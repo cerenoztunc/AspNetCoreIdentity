@@ -40,7 +40,7 @@ namespace Project.MVC
                 opt.Password.RequireLowercase = false;
                 opt.Password.RequireUppercase = false;
                 opt.Password.RequireDigit = false;
-            }).AddPasswordValidator<CustomPasswordValidator>().AddUserValidator<CustomUserValidator>()
+            }).AddPasswordValidator<CustomPasswordValidator>().AddUserValidator<CustomUserValidator>().AddErrorDescriber<CustomIdentityErrorDescriber>()
                 .AddEntityFrameworkStores<AppIdentityDbContext>();
 
             services.AddMvc(opt=> 
