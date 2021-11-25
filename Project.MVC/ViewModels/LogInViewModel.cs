@@ -15,5 +15,6 @@ namespace Project.MVC.ViewModels
         [DataType(DataType.Password)]
         [MinLength(4, ErrorMessage = "{0}, must be at least {1} characters!")]
         public string Password { get; set; }
+        public bool RememberMe { get; set; }
     }
 }

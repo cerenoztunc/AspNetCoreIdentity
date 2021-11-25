@@ -50,8 +50,9 @@ namespace Project.MVC.Controllers
             }
             return View(signUpViewModel);
         }
-        public IActionResult LogIn()
+        public IActionResult LogIn(string returnUrl)
         {
+            TempData["ReturnUrl"] = returnUrl;
             return View();
         }
         [HttpPost]
@@ -63,10 +64,14 @@ namespace Project.MVC.Controllers
                 if (user != null)
                 {
                     //await _signInManager.SignOutAsync();
-                    var signInResult = await _signInManager.PasswordSignInAsync(user, logInViewModel.Password, true, false);
+                    var signInResult = await _signInManager.PasswordSignInAsync(user, logInViewModel.Password, logInViewModel.RememberMe, false);
 
                     if (signInResult.Succeeded)
                     {
+                        if (TempData["ReturnUrl"] != null)
+                        {
+                            return Redirect(TempData["ReturnUrl"].ToString());
+                        }
                         return RedirectToAction("Index", "Member");
                     }
                     else
@@ -79,7 +84,7 @@ namespace Project.MVC.Controllers
                     ModelState.AddModelError("", "No such user found!");
                 }
             }
-            return View();
+            return View(logInViewModel);
         }
     }
 }
