@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Project.MVC.CustomValidations;
 using Project.MVC.Models;
 using Project.MVC.Models.DbContext;
 using System;
@@ -29,7 +30,17 @@ namespace Project.MVC
                 opt.UseSqlServer(_configuration["ConnectionStrings:DefaultConnectionString"]);
             });
 
-            services.AddIdentity<AppUser, AppRole>().AddEntityFrameworkStores<AppIdentityDbContext>();
+            services.AddIdentity<AppUser, AppRole>(opt=> 
+            {
+                opt.User.RequireUniqueEmail = true;
+                opt.User.AllowedUserNameCharacters = "abcçdefgðhýijklmnoöpqrsþtuvwxyzABCÇDEFGÐHIÝJKLMNOÖPQRSÞTUVWXYZ0123456789 -._";
+                 opt.Password.RequiredLength = 4;
+                opt.Password.RequireNonAlphanumeric = false;
+                opt.Password.RequireLowercase = false;
+                opt.Password.RequireUppercase = false;
+                opt.Password.RequireDigit = false;
+            }).AddPasswordValidator<CustomPasswordValidator>()
+                .AddEntityFrameworkStores<AppIdentityDbContext>();
 
             services.AddMvc(opt=> 
             {
