@@ -63,11 +63,16 @@ namespace Project.MVC.Controllers
                 AppUser user = await _userManager.FindByEmailAsync(logInViewModel.Email);
                 if (user != null)
                 {
-                    //await _signInManager.SignOutAsync();
+                    if(await _userManager.IsLockedOutAsync(user))
+                    {
+                        ModelState.AddModelError("", "Your account has been locked for a while. Please try again later!");
+                    }
+                    await _signInManager.SignOutAsync();
                     var signInResult = await _signInManager.PasswordSignInAsync(user, logInViewModel.Password, logInViewModel.RememberMe, false);
 
                     if (signInResult.Succeeded)
                     {
+                        await _userManager.ResetAccessFailedCountAsync(user);
                         if (TempData["ReturnUrl"] != null)
                         {
                             return Redirect(TempData["ReturnUrl"].ToString());
@@ -76,7 +81,21 @@ namespace Project.MVC.Controllers
                     }
                     else
                     {
-                        ModelState.AddModelError("", "Username or password is incorrect");
+                        await _userManager.AccessFailedAsync(user);
+                        
+                        int fail = await _userManager.GetAccessFailedCountAsync(user);
+                        if (fail<3)
+                        {
+                            ModelState.AddModelError("", $"{fail} times failed login!");
+                            ModelState.AddModelError("", "Username or password is incorrect");
+                        }
+                        
+                        else if (fail == 3)
+                        {
+                            await _userManager.SetLockoutEndDateAsync(user, new DateTimeOffset(DateTime.Now.AddMinutes(20)));
+                            ModelState.AddModelError("", "Your account has been locked for 20 minutes due to 3 failed logins!");
+                        }
+                        
                     }
                 }
                 else
