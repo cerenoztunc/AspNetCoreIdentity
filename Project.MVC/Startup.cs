@@ -30,12 +30,29 @@ namespace Project.MVC
                 opt.UseSqlServer(_configuration["ConnectionStrings:DefaultConnectionString"]);
             });
 
+            CookieBuilder cookieBuilder = new CookieBuilder()
+            {
+                Name = "MyBlog",
+                HttpOnly = false,
+                Expiration = TimeSpan.FromDays(60), //kullanýcý bilgisi cookie'de 60 gün tutulacak..
+                SameSite = SameSiteMode.Lax,  //bir cookie'yi kaydettikten sonra sadece o site üzerinden bu cookie'ye ulaþabilmek için bu özelliðin strict yapýlmasý gerekir böylece baþka herhangi bir siteden eriþilemezler..Ancsk eðer banka uygulamasý deðilse bu app o zaman default olan lax'te býrakýlabilir. 
+                SecurePolicy = CookieSecurePolicy.SameAsRequest
+            };
+
+            services.ConfigureApplicationCookie(opt =>
+            {
+                opt.LoginPath = new PathString("/Home/Login");
+                opt.Cookie = cookieBuilder;
+                opt.SlidingExpiration = true; //eðer kullanýcý siteyi sürekli ziyaret ediyorsa ve yukarýdaki expiration gününün yarýsýndan sonra da giriþ yapmýþsa login durumunu bir 60 gün daha uzatýr... 
+                
+            });
+
             services.AddIdentity<AppUser, AppRole>(opt=> 
             {
                 opt.User.RequireUniqueEmail = true;
                 opt.User.AllowedUserNameCharacters = "abcçdefgðhýijklmnoöpqrsþtuvwxyzABCÇDEFGÐHIÝJKLMNOÖPQRSÞTUVWXYZ0123456789 -._";
                 
-                 opt.Password.RequiredLength = 4;
+                opt.Password.RequiredLength = 4;
                 opt.Password.RequireNonAlphanumeric = false;
                 opt.Password.RequireLowercase = false;
                 opt.Password.RequireUppercase = false;
