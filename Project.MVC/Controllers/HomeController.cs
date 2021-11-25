@@ -12,10 +12,11 @@ namespace Project.MVC.Controllers
     public class HomeController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
-
-        public HomeController(UserManager<AppUser> userManager)
+        private readonly SignInManager<AppUser> _signInManager;
+        public HomeController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         public IActionResult Index()
@@ -51,6 +52,33 @@ namespace Project.MVC.Controllers
         }
         public IActionResult LogIn()
         {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> LogIn(LogInViewModel logInViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                AppUser user = await _userManager.FindByEmailAsync(logInViewModel.Email);
+                if (user != null)
+                {
+                    //await _signInManager.SignOutAsync();
+                    var signInResult = await _signInManager.PasswordSignInAsync(user, logInViewModel.Password, true, false);
+
+                    if (signInResult.Succeeded)
+                    {
+                        return RedirectToAction("Index", "Member");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Username or password is incorrect");
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError("", "No such user found!");
+                }
+            }
             return View();
         }
     }

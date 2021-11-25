@@ -30,19 +30,21 @@ namespace Project.MVC
                 opt.UseSqlServer(_configuration["ConnectionStrings:DefaultConnectionString"]);
             });
 
-            CookieBuilder cookieBuilder = new CookieBuilder()
-            {
-                Name = "MyBlog",
-                HttpOnly = false,
-                Expiration = TimeSpan.FromDays(60), //kullanýcý bilgisi cookie'de 60 gün tutulacak..
-                SameSite = SameSiteMode.Lax,  //bir cookie'yi kaydettikten sonra sadece o site üzerinden bu cookie'ye ulaþabilmek için bu özelliðin strict yapýlmasý gerekir böylece baþka herhangi bir siteden eriþilemezler..Ancsk eðer banka uygulamasý deðilse bu app o zaman default olan lax'te býrakýlabilir. 
-                SecurePolicy = CookieSecurePolicy.SameAsRequest
-            };
+            CookieBuilder cookieBuilder = new CookieBuilder();
+
+            cookieBuilder.Name = "MyBlog";
+            cookieBuilder.HttpOnly = false;
+             
+            cookieBuilder.SameSite = SameSiteMode.Lax;  //bir cookie'yi kaydettikten sonra sadece o site üzerinden bu cookie'ye ulaþabilmek için bu özelliðin strict yapýlmasý gerekir böylece baþka herhangi bir siteden eriþilemezler..Ancsk eðer banka uygulamasý deðilse bu app o zaman default olan lax'te býrakýlabilir. 
+            cookieBuilder.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+            
 
             services.ConfigureApplicationCookie(opt =>
             {
                 opt.LoginPath = new PathString("/Home/Login");
                 opt.Cookie = cookieBuilder;
+                //kullanýcý bilgisi cookie'de 60 gün tutulacak..
+                opt.ExpireTimeSpan = TimeSpan.FromDays(60);
                 opt.SlidingExpiration = true; //eðer kullanýcý siteyi sürekli ziyaret ediyorsa ve yukarýdaki expiration gününün yarýsýndan sonra da giriþ yapmýþsa login durumunu bir 60 gün daha uzatýr... 
                 
             });
