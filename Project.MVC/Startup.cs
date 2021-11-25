@@ -34,12 +34,13 @@ namespace Project.MVC
             {
                 opt.User.RequireUniqueEmail = true;
                 opt.User.AllowedUserNameCharacters = "abcçdefgðhýijklmnoöpqrsþtuvwxyzABCÇDEFGÐHIÝJKLMNOÖPQRSÞTUVWXYZ0123456789 -._";
+                
                  opt.Password.RequiredLength = 4;
                 opt.Password.RequireNonAlphanumeric = false;
                 opt.Password.RequireLowercase = false;
                 opt.Password.RequireUppercase = false;
                 opt.Password.RequireDigit = false;
-            }).AddPasswordValidator<CustomPasswordValidator>()
+            }).AddPasswordValidator<CustomPasswordValidator>().AddUserValidator<CustomUserValidator>()
                 .AddEntityFrameworkStores<AppIdentityDbContext>();
 
             services.AddMvc(opt=> 
