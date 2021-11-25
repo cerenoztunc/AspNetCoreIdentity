@@ -95,7 +95,6 @@ namespace Project.MVC.Controllers
                             await _userManager.SetLockoutEndDateAsync(user, new DateTimeOffset(DateTime.Now.AddMinutes(20)));
                             ModelState.AddModelError("", "Your account has been locked for 20 minutes due to 3 failed logins!");
                         }
-                        
                     }
                 }
                 else
@@ -105,5 +104,70 @@ namespace Project.MVC.Controllers
             }
             return View(logInViewModel);
         }
+        public IActionResult ResetPassword()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(PasswordResetViewModel passwordResetViewModel)
+        {
+            AppUser appUser = await _userManager.FindByEmailAsync(passwordResetViewModel.Email);
+
+            if (appUser != null)
+            {
+                string passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(appUser);
+                string passwordResetLink = Url.Action("ResetPasswordConfirm", "Home", new
+                {
+                    userId = appUser.Id,
+                    token = passwordResetToken,
+                }, HttpContext.Request.Scheme);
+
+                Helpers.PasswordReset.PasswordResetSendEmail(passwordResetLink);
+
+                ViewBag.status = "successfull";
+            }
+            else
+            {
+                ModelState.AddModelError("", "No such user found!");
+            }
+            return View(passwordResetViewModel);
+        }
+        public IActionResult ResetPasswordConfirm(string userId, string token)
+        {
+            TempData["userId"] = userId;
+            TempData["token"] = token;
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> ResetPasswordConfirm([Bind("NewPassword")]PasswordResetViewModel passwordResetViewModel) //bind view içinde sadece istediğimiz property'i almamızı sağlar..
+        {
+            string token = TempData["token"].ToString();
+            string userId = TempData["userId"].ToString();
+
+            AppUser user = await _userManager.FindByIdAsync(userId);
+            if(user != null)
+            {
+                IdentityResult result = await _userManager.ResetPasswordAsync(user, token, passwordResetViewModel.NewPassword);
+                if (result.Succeeded)
+                {
+                    await _userManager.UpdateSecurityStampAsync(user); //kritik bilgiler güncellendiğinde securitystamp alanı update edilmelidir. yoksa kullanıcı eski şifresini kullanabilmeye devam eder.
+                    
+                    ViewBag.status = "successfull";
+                }
+                else
+                {
+                    foreach (var item in result.Errors)
+                    {
+                        ModelState.AddModelError("", item.Description);
+                    }
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("", "An error has occurred. Please try again later.");
+            }
+            return View();
+        }
+
     }
 }

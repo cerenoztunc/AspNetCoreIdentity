@@ -30,20 +30,20 @@ namespace Project.MVC
                 opt.UseSqlServer(_configuration["ConnectionStrings:DefaultConnectionString"]);
             });
 
-            
 
-            services.AddIdentity<AppUser, AppRole>(opt=> 
+
+            services.AddIdentity<AppUser, AppRole>(opt =>
             {
                 opt.User.RequireUniqueEmail = true;
                 opt.User.AllowedUserNameCharacters = "abcçdefgðhýijklmnoöpqrsþtuvwxyzABCÇDEFGÐHIÝJKLMNOÖPQRSÞTUVWXYZ0123456789 -._";
-                
+
                 opt.Password.RequiredLength = 4;
                 opt.Password.RequireNonAlphanumeric = false;
                 opt.Password.RequireLowercase = false;
                 opt.Password.RequireUppercase = false;
                 opt.Password.RequireDigit = false;
             }).AddPasswordValidator<CustomPasswordValidator>().AddUserValidator<CustomUserValidator>().AddErrorDescriber<CustomIdentityErrorDescriber>()
-                .AddEntityFrameworkStores<AppIdentityDbContext>();
+                .AddEntityFrameworkStores<AppIdentityDbContext>().AddDefaultTokenProviders();
 
             
             CookieBuilder cookieBuilder = new CookieBuilder();
