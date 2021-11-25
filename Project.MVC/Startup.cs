@@ -29,7 +29,7 @@ namespace Project.MVC
                 opt.UseSqlServer(_configuration["ConnectionStrings:DefaultConnectionString"]);
             });
 
-            services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<AppIdentityDbContext>();
+            services.AddIdentity<AppUser, AppRole>().AddEntityFrameworkStores<AppIdentityDbContext>();
 
             services.AddMvc(opt=> 
             {
