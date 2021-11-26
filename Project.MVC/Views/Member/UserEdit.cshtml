@@ -1,0 +1,54 @@
+﻿@model Project.MVC.ViewModels.UserViewModel
+
+@{
+    ViewData["Title"] = "UserEdit";
+    Layout = "~/Views/Shared/_MemberLayout.cshtml";
+}
+
+@if (ViewBag.success == "true")
+{
+    <div class="row mt-4 alert-info">
+        Your information has been successfully updated. 
+        <br />
+        <p class="text-danger">You are being redirected to the homepage!</p>
+    </div>
+    <script>
+        setTimeout(function () {
+            window.location.href = 'https://localhost:44386/Member';
+        }, 4000)
+    </script>
+}
+else
+{
+    <div class="row mt-4">
+        <div class="col-md-6 col-md-3">
+            <h4>UserViewModel</h4>
+            <hr />
+            <form asp-action="UserEdit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="UserName" class="control-label"></label>
+                    <input asp-for="UserName" class="form-control" />
+                    <span asp-validation-for="UserName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="PhoneNumber" class="control-label"></label>
+                    <input asp-for="PhoneNumber" class="form-control" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Email" class="control-label"></label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <input type="submit" value="Update" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+
+

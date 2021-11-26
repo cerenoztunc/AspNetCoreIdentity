@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Mapster;
 
 namespace Project.MVC.Controllers
 {
@@ -21,6 +22,10 @@ namespace Project.MVC.Controllers
 
         public IActionResult Index()
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Member");
+            }
             return View();
         }
         public IActionResult SignUp()
@@ -168,6 +173,7 @@ namespace Project.MVC.Controllers
             }
             return View();
         }
+        
 
     }
 }

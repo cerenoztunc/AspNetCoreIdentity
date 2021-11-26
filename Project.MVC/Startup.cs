@@ -55,6 +55,7 @@ namespace Project.MVC
             services.ConfigureApplicationCookie(opt =>
             {
                 opt.LoginPath = new PathString("/Home/Login");
+                opt.LogoutPath = new PathString("/Member/LogOut");
                 opt.Cookie = cookieBuilder;
                 opt.SlidingExpiration = true; //eðer kullanýcý siteyi sürekli ziyaret ediyorsa ve yukarýdaki expiration gününün yarýsýndan sonra da giriþ yapmýþsa login durumunu bir 60 gün daha uzatýr... 
                 //kullanýcý bilgisi cookie'de 60 gün tutulacak..

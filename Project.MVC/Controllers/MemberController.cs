@@ -21,7 +21,6 @@ namespace Project.MVC.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
         }
-
         public async Task<IActionResult> Index()
         {
             AppUser user = await _userManager.FindByNameAsync(User.Identity.Name); //her kullanıcı için bir User.Identity yapısı mutlaka oluşur. kullanıcı kayıt yapmamış olsa da ama burada içi boştur. Eğer kullanıcı kayıt yapmışsa o zaman bilgiler dolmaya başlar..
@@ -76,6 +75,45 @@ namespace Project.MVC.Controllers
             }
             return View(passwordChangeViewModel);
 
+        }
+        public IActionResult UserEdit()
+        {
+            AppUser user = _userManager.FindByNameAsync(User.Identity.Name).Result;
+            UserViewModel userViewModel = user.Adapt<UserViewModel>();
+            return View(userViewModel);
+        }
+        [HttpPost]
+        public async Task<IActionResult> UserEdit(UserViewModel userViewModel)
+        {
+            ModelState.Remove("Password");
+            
+            if (ModelState.IsValid)
+            {
+                AppUser user = await _userManager.FindByNameAsync(User.Identity.Name);
+                user.UserName = userViewModel.UserName;
+                user.PhoneNumber = userViewModel.PhoneNumber;
+                user.Email = userViewModel.Email;
+                IdentityResult result =  await _userManager.UpdateAsync(user);
+                if (result.Succeeded)
+                {
+                    await _userManager.UpdateSecurityStampAsync(user);
+                    await _signInManager.SignOutAsync();
+                    await _signInManager.SignInAsync(user, true);
+                    ViewBag.success = "true";
+                }
+                else
+                {
+                    foreach (var item in result.Errors)
+                    {
+                        ModelState.AddModelError("", item.Description);
+                    }
+                }
+            }
+            return View(userViewModel);
+        }
+        public void LogOut()
+        {
+            _signInManager.SignOutAsync();
         }
     }
 }

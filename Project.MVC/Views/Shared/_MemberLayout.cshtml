@@ -20,14 +20,13 @@
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item active">
                         <a class="nav-link text-dark" asp-controller="Member" asp-action="Index">Member Home Page </a>
-                        
                     </li>
                 </ul>
                 <ul class="navbar-nav">
                     <li>
                         <a class="btn btn-link text-black-50" asp-action="PasswordChange" asp-controller="Member">Password Change</a>
                         <a class="btn btn-link text-black-50" asp-action="UserEdit" asp-controller="Member">Edit Profile</a>
-                        <a class="btn btn-link text-dark" asp-action="LogOut" asp-controller="Member">Log Out</a>
+                        <a class="btn btn-link text-dark" asp-action="LogOut" asp-controller="Member" asp-route-returnUrl="/Home/Index">Log Out</a>
                     </li>
                 </ul>
             </div>
