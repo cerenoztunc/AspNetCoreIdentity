@@ -14,10 +14,12 @@ namespace Project.MVC.Controllers
     public class MemberController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
 
-        public MemberController(UserManager<AppUser> userManager)
+        public MemberController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         public async Task<IActionResult> Index()
@@ -26,6 +28,54 @@ namespace Project.MVC.Controllers
             UserViewModel userViewModel = user.Adapt<UserViewModel>(); //adapt map gibidir. ondan daha hafiftir. 
             
             return View(userViewModel);
+        }
+        public IActionResult PasswordChange()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> PasswordChange(PasswordChangeViewModel passwordChangeViewModel)
+        {
+            AppUser appUser = await _userManager.FindByNameAsync(User.Identity.Name);
+            if (ModelState.IsValid)
+            {
+                if (appUser != null)
+                {
+                    bool exist = await _userManager.CheckPasswordAsync(appUser, passwordChangeViewModel.OldPassword);
+                    if (exist)
+                    {
+                        IdentityResult result = await _userManager.ChangePasswordAsync(appUser, passwordChangeViewModel.OldPassword, passwordChangeViewModel.NewPassword);
+                        if (result.Succeeded)
+                        {
+                            await _userManager.UpdateSecurityStampAsync(appUser);
+                            await _signInManager.SignOutAsync();
+                            await _signInManager.PasswordSignInAsync(appUser, passwordChangeViewModel.NewPassword,true,false);
+                            ViewBag.success = "true";
+                        }
+                        else
+                        {
+                            foreach (var item in result.Errors)
+                            {
+                                ModelState.AddModelError("", item.Description);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "OldPassword is wrong!");
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError("", "User is not found");
+                }
+            }
+            else
+            {
+                return View(passwordChangeViewModel);
+            }
+            return View(passwordChangeViewModel);
+
         }
     }
 }
