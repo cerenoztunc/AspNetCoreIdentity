@@ -1,0 +1,27 @@
+﻿@model Project.MVC.ViewModels.RoleViewModel
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row mt-4">
+    <div class="col-md-6 offset-md-1">
+        <h4>Role Creation Form</h4>
+        <hr />
+        <form asp-action="RoleCreate">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="Create Role" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+
