@@ -30,8 +30,6 @@ namespace Project.MVC
                 opt.UseSqlServer(_configuration["ConnectionStrings:DefaultConnectionString"]);
             });
 
-
-
             services.AddIdentity<AppUser, AppRole>(opt =>
             {
                 opt.User.RequireUniqueEmail = true;
@@ -54,12 +52,13 @@ namespace Project.MVC
 
             services.ConfigureApplicationCookie(opt =>
             {
-                opt.LoginPath = new PathString("/Home/Login");
+                opt.LoginPath = new PathString("/Home/Login"); //Login olmayan bir kullanýcýnýn loginkinken eriþilebilecek bir sayfaya eriþmeye çalýþtýðýnda yönlendirilecek path
                 opt.LogoutPath = new PathString("/Member/LogOut");
                 opt.Cookie = cookieBuilder;
                 opt.SlidingExpiration = true; //eðer kullanýcý siteyi sürekli ziyaret ediyorsa ve yukarýdaki expiration gününün yarýsýndan sonra da giriþ yapmýþsa login durumunu bir 60 gün daha uzatýr... 
                 //kullanýcý bilgisi cookie'de 60 gün tutulacak..
                 opt.ExpireTimeSpan = TimeSpan.FromDays(60);
+                opt.AccessDeniedPath = new PathString("/Member/AccessDenied"); //Yukarýdakinin aksine Login olan bir kullanýcýnýn eriþim izni olmayan bir sayfaya yönlendirmesini saðlayacak path
             });
             services.AddMvc(opt =>
             {

@@ -10,16 +10,11 @@ using Mapster;
 
 namespace Project.MVC.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager;
-        public HomeController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        public HomeController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager):base(userManager,signInManager)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
         }
-
         public IActionResult Index()
         {
             if (User.Identity.IsAuthenticated)
@@ -33,7 +28,7 @@ namespace Project.MVC.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> SignUp(SignUpViewModel signUpViewModel)
+        public async Task<IActionResult> SignUp(UserViewModel signUpViewModel)
         {
             if (ModelState.IsValid)
             {
@@ -47,10 +42,7 @@ namespace Project.MVC.Controllers
                 if (result.Succeeded) return RedirectToAction("LogIn");
                 else
                 {
-                    foreach (var item in result.Errors)
-                    {
-                        ModelState.AddModelError("", item.Description);
-                    }
+                    AddModelError(result);
                 }
             }
             return View(signUpViewModel);
@@ -161,10 +153,7 @@ namespace Project.MVC.Controllers
                 }
                 else
                 {
-                    foreach (var item in result.Errors)
-                    {
-                        ModelState.AddModelError("", item.Description);
-                    }
+                    AddModelError(result);
                 }
             }
             else

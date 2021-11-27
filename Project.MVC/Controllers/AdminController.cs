@@ -8,16 +8,17 @@ using System.Threading.Tasks;
 
 namespace Project.MVC.Controllers
 {
-    public class AdminController : Controller
+    public class AdminController : BaseController
     {
-        private readonly UserManager<AppUser> _userManager;
-
-        public AdminController(UserManager<AppUser> userManager)
+        public AdminController(UserManager<AppUser> userManager,RoleManager<AppRole> roleManager):base(userManager,null,roleManager)
         {
-            _userManager = userManager;
         }
 
         public IActionResult Index()
+        {
+            return View();
+        }
+        public IActionResult Users()
         {
             return View(_userManager.Users.ToList());
         }

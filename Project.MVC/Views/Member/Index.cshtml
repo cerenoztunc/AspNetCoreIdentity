@@ -8,8 +8,7 @@
 
 <div class="row">
     <div class="col-sm-3">
-        
-        <img style="width:100%; height:100%;" src="~/UserPicture/profile.jpg" />
+        <img style="width:100%; height:100%;" src="@Model.Picture" />
     </div>
     <div class="col-sm-9">
         <table class="table table-bordered table-striped">
@@ -24,6 +23,18 @@
             <tr>
                 <td>Phone Number: </td>
                 <td>@Model.PhoneNumber</td>
+            </tr>
+            <tr>
+                <td>Birth Day: </td>
+                <td>@(Model.BirthDay == null ? "" : Model.BirthDay.Value.ToShortDateString())</td>
+            </tr>
+            <tr>
+                <td>City: </td>
+                <td>@Model.City</td>
+            </tr>
+            <tr>
+                <td>Gender: </td>
+                <td>@Model.Gender</td>
             </tr>
         </table>
     </div>

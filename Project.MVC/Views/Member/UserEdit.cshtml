@@ -15,16 +15,15 @@
     <script>
         setTimeout(function () {
             window.location.href = 'https://localhost:44386/Member';
-        }, 4000)
+        }, 5000)
     </script>
 }
-else
-{
+
     <div class="row mt-4">
         <div class="col-md-6 col-md-3">
             <h4>UserViewModel</h4>
             <hr />
-            <form asp-action="UserEdit">
+            <form asp-action="UserEdit" method="post" enctype="multipart/form-data">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <div class="form-group">
                     <label asp-for="UserName" class="control-label"></label>
@@ -41,14 +40,38 @@ else
                     <input asp-for="Email" class="form-control" />
                     <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
+                <div class="form-group">
+                    <label asp-for="BirthDay" class="control-label"></label>
+                    <input asp-for="BirthDay" class="form-control" />
+                    <span asp-validation-for="BirthDay" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="City" class="control-label"></label>
+                    <input asp-for="City" class="form-control" />
+                    <span asp-validation-for="City" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Gender" class="control-label"></label>
+                    <select asp-for="Gender" class="form-control" asp-items="@ViewBag.Gender">
+                        <option>Choose gender</option>
+                    </select>
+                    <span asp-validation-for="Gender" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Picture</label>
+                    <div class="col-sm-3">
+                        <img style="width:50%; height:50%;" class="rounded-circle" src="@Model.Picture" />
+                    </div>
+                    <input type="file" class="form-control" name="userPicture" />
 
+                </div>
                 <div class="form-group">
                     <input type="submit" value="Update" class="btn btn-primary" />
                 </div>
             </form>
         </div>
     </div>
-}
+
 
 
 
