@@ -31,6 +31,10 @@ namespace Project.MVC.Controllers
             
             return View(_roleManager.Roles.ToList());
         }
+        public IActionResult Claims()
+        {
+            return View(User.Claims.ToList()); //burdaki bilgiler cookie'den doluyor..
+        }
         public IActionResult RoleCreate()
         {
             return View();
