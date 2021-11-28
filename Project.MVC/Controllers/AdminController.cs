@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Mapster;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Project.MVC.Models;
 using Project.MVC.ViewModels;
@@ -23,6 +24,10 @@ namespace Project.MVC.Controllers
         {
             return View(_userManager.Users.ToList());
         }
+        public IActionResult Roles()
+        {
+            return View(_roleManager.Roles.ToList());
+        }
         public IActionResult RoleCreate()
         {
             return View();
@@ -40,9 +45,37 @@ namespace Project.MVC.Controllers
             else AddModelError(result);
             return View(roleViewModel);
         }
-        public IActionResult Roles()
+        public async Task<IActionResult> RoleDelete(string id)
         {
-            return View(_roleManager.Roles.ToList());
+            var role = await _roleManager.FindByIdAsync(id);
+            if(role != null)
+            {
+                IdentityResult result = await _roleManager.DeleteAsync(role);
+            }
+            
+            return RedirectToAction("Roles");
         }
+        public async Task<IActionResult> RoleUpdate(string id)
+        {
+            var role = await _roleManager.FindByIdAsync(id);
+            RoleViewModel roleViewModel = role.Adapt<RoleViewModel>();
+            return View(roleViewModel);
+        }
+        [HttpPost]
+        public async Task<IActionResult> RoleUpdate(RoleViewModel roleViewModel)
+        {
+            var role = await _roleManager.FindByIdAsync(roleViewModel.Id);
+            if (role != null)
+            {
+                role.Name = roleViewModel.Name;
+                IdentityResult result = await _roleManager.UpdateAsync(role);
+                if (result.Succeeded)
+                    return RedirectToAction("Roles");
+                else
+                    AddModelError(result);
+            }
+            return View(roleViewModel);
+        }
+
     }
 }

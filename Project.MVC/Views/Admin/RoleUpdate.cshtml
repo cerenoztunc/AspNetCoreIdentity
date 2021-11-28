@@ -1,0 +1,28 @@
+﻿@model Project.MVC.ViewModels.RoleViewModel
+
+@{
+    ViewData["Title"] = "RoleUpdate";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <h4>Role Update Form</h4>
+        <hr />
+        <form asp-action="RoleUpdate">
+            <input type="hidden" asp-for="Id" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Update" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+
