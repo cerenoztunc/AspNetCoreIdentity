@@ -26,6 +26,7 @@ namespace Project.MVC.Controllers
         }
         public IActionResult Roles()
         {
+            
             return View(_roleManager.Roles.ToList());
         }
         public IActionResult RoleCreate()
@@ -75,6 +76,43 @@ namespace Project.MVC.Controllers
                     AddModelError(result);
             }
             return View(roleViewModel);
+        }
+        public async Task<IActionResult> RoleAssign(string id)
+        {
+            TempData["UserId"] = id;
+            AppUser user = await _userManager.FindByIdAsync(id);
+            IQueryable<AppRole> roles = _roleManager.Roles;
+            ViewBag.userName = user.UserName;
+            List<string> userRoles = await _userManager.GetRolesAsync(user) as List<string>;
+
+            List<RoleAssignViewModel> roleAssignViewModels = new List<RoleAssignViewModel>();
+
+            foreach (var item in roles)
+            {
+                RoleAssignViewModel roleAssignViewModel = new RoleAssignViewModel();
+                roleAssignViewModel.RoleId = item.Id;
+                roleAssignViewModel.RoleName = item.Name;
+                if (userRoles.Contains(item.Name))
+                    roleAssignViewModel.Exist = true;
+                else
+                    roleAssignViewModel.Exist = false;
+                roleAssignViewModels.Add(roleAssignViewModel);
+            }
+            return View(roleAssignViewModels);
+        }
+        [HttpPost]
+        public async Task<IActionResult> RoleAssign(List<RoleAssignViewModel> roleAssignViewModels)
+        {
+            AppUser appUser = await _userManager.FindByIdAsync(TempData["UserId"].ToString());
+            foreach (var item in roleAssignViewModels)
+            {
+                if (item.Exist)
+                    await _userManager.AddToRoleAsync(appUser, item.RoleName);
+                else
+                    await _userManager.RemoveFromRoleAsync(appUser, item.RoleName);
+            }
+           
+            return RedirectToAction("Users");
         }
 
     }
