@@ -134,7 +134,6 @@ namespace Project.MVC.Controllers
             }
             return View(userViewModel);
         }
-
         public async Task DeleteImage(IFormFile userPicture, AppUser user)
         {
             var fileName = Guid.NewGuid().ToString() + Path.GetExtension(userPicture.FileName);
@@ -145,12 +144,21 @@ namespace Project.MVC.Controllers
                 user.Picture = "/UserPicture/" + fileName;
             }
         }
-
         public void LogOut()
         {
             _signInManager.SignOutAsync();
         }
         public IActionResult AccessDenied()
+        {
+            return View();
+        }
+        [Authorize(Roles ="Editor,Admin")]
+        public IActionResult Editor()
+        {
+            return View();
+        }
+        [Authorize(Roles = "Manager,Admin")]
+        public IActionResult Manager()
         {
             return View();
         }

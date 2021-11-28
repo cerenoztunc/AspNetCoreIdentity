@@ -26,11 +26,11 @@
             </tr>
             <tr>
                 <td>Birth Day: </td>
-                <td>@(Model.BirthDay == null ? "" : Model.BirthDay.Value.ToShortDateString())</td>
+                <td>@(Model.BirthDay == null ? "-" : Model.BirthDay.Value.ToShortDateString())</td>
             </tr>
             <tr>
                 <td>City: </td>
-                <td>@Model.City</td>
+                <td>@(Model.City == null ?"-" :Model.City)</td>
             </tr>
             <tr>
                 <td>Gender: </td>

@@ -1,4 +1,5 @@
 ﻿using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Project.MVC.Models;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace Project.MVC.Controllers
 {
+    [Authorize(Roles ="Admin")]
     public class AdminController : BaseController
     {
         public AdminController(UserManager<AppUser> userManager,RoleManager<AppRole> roleManager):base(userManager,null,roleManager)
