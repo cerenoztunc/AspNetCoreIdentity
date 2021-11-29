@@ -11,17 +11,17 @@ namespace Project.MVC.CustomTagHelpers
     [HtmlTargetElement("td",Attributes = "user-roles")]
     public class UserRolesName:TagHelper
     {
-        public UserManager<AppUser> UserManager { get; set; }
+        private readonly UserManager<AppUser> _userManager;
         public UserRolesName(UserManager<AppUser> userManager)
         {
-            this.UserManager = userManager;
+            _userManager = userManager;
         }
         [HtmlAttributeName("user-roles")]
         public string UserId { get; set; }
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
-            AppUser user = await UserManager.FindByIdAsync(UserId);
-            var roles = await UserManager.GetRolesAsync(user);
+            AppUser user = await _userManager.FindByIdAsync(UserId);
+            var roles = await _userManager.GetRolesAsync(user);
             string html = string.Empty;
             roles.ToList().ForEach(x =>
             {

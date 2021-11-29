@@ -92,28 +92,31 @@ namespace Project.MVC.Controllers
             if (ModelState.IsValid)
             {
                 AppUser user = CurrentUser;
-                if (user.Picture == null)
+                if (userPicture != null)
                 {
-                    if (userPicture != null && userPicture.Length > 0)
+                    if (user.Picture == null)
                     {
-                        await DeleteImage(userPicture,user);
-                    }
-                }
-                else
-                {
-                    if(user.Picture != "profile.jpg")
-                    {
-                        var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/UserPicture", user.Picture);
-                        var toBeDeleted = oldPath.Split("/")[2];
-                        var fullPath = _hostWebEnvironment.WebRootPath + "/UserPicture/" + toBeDeleted;
-                        if (System.IO.File.Exists(fullPath))
+                        if (userPicture != null && userPicture.Length > 0)
                         {
-                            System.IO.File.Delete(fullPath);
+                            await UploadImage(userPicture, user);
                         }
-                        await DeleteImage(userPicture, user);
+                    }
+                    else 
+                    {
+                        if (user.Picture != "profile.jpg")
+                        {
+                            var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/UserPicture", user.Picture);
+                            var toBeDeleted = oldPath.Split("/")[2];
+                            var fullPath = _hostWebEnvironment.WebRootPath + "/UserPicture/" + toBeDeleted;
+                            if (System.IO.File.Exists(fullPath))
+                            {
+                                System.IO.File.Delete(fullPath);
+                            }
+                            await UploadImage(userPicture, user);
+                        }
                     }
                 }
-                user.City = userViewModel.City;
+                user.City = userViewModel.City.ToLower();
                 user.BirthDay = userViewModel.BirthDay;
                 user.Gender = (int)userViewModel.Gender;
                 user.UserName = userViewModel.UserName;
@@ -134,7 +137,7 @@ namespace Project.MVC.Controllers
             }
             return View(userViewModel);
         }
-        public async Task DeleteImage(IFormFile userPicture, AppUser user)
+        public async Task UploadImage(IFormFile userPicture, AppUser user)
         {
             var fileName = Guid.NewGuid().ToString() + Path.GetExtension(userPicture.FileName);
             var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/UserPicture", fileName);
@@ -159,6 +162,11 @@ namespace Project.MVC.Controllers
         }
         [Authorize(Roles = "Manager,Admin")]
         public IActionResult Manager()
+        {
+            return View();
+        }
+        [Authorize(Policy="AnkaraPolicy")]
+        public IActionResult AnkaraPage()
         {
             return View();
         }

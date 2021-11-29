@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -6,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Project.MVC.ClaimProviders;
 using Project.MVC.CustomValidations;
 using Project.MVC.Models;
 using Project.MVC.Models.DbContext;
@@ -28,6 +30,14 @@ namespace Project.MVC
             services.AddDbContext<AppIdentityDbContext>(opt =>
             {
                 opt.UseSqlServer(_configuration["ConnectionStrings:DefaultConnectionString"]);
+            });
+
+            services.AddAuthorization(opt =>
+            {
+                opt.AddPolicy("AnkaraPolicy", policy =>
+                {
+                    policy.RequireClaim("city", "ankara");
+                });
             });
 
             services.AddIdentity<AppUser, AppRole>(opt =>
@@ -60,6 +70,7 @@ namespace Project.MVC
                 opt.ExpireTimeSpan = TimeSpan.FromDays(60);
                 opt.AccessDeniedPath = new PathString("/Member/AccessDenied"); //Yukarýdakinin aksine Login olan bir kullanýcýnýn eriþim izni olmayan bir sayfaya yönlendirmesini saðlayacak path
             });
+            services.AddScoped<IClaimsTransformation, ClaimProvider>();
             services.AddMvc(opt =>
             {
                 opt.EnableEndpointRouting = false;

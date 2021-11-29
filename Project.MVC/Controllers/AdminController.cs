@@ -52,6 +52,7 @@ namespace Project.MVC.Controllers
             else AddModelError(result);
             return View(roleViewModel);
         }
+
         public async Task<IActionResult> RoleDelete(string id)
         {
             var role = await _roleManager.FindByIdAsync(id);
