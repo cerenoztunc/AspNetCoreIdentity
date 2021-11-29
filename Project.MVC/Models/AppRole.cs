@@ -9,4 +9,5 @@ namespace Project.MVC.Models
     public class AppRole:IdentityRole
     {
     }
+   
 }

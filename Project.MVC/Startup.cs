@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -31,6 +32,7 @@ namespace Project.MVC
             {
                 opt.UseSqlServer(_configuration["ConnectionStrings:DefaultConnectionString"]);
             });
+            services.AddTransient<IAuthorizationHandler, ExpiryDateHandler>(); //her çalýþtýðýnda tekrar kontrol edilmesi için addtransient yaptýk..
 
             services.AddAuthorization(opt =>
             {
@@ -38,10 +40,15 @@ namespace Project.MVC
                 {
                     policy.RequireClaim("city", "ankara");
                 });
+                
                 opt.AddPolicy("ViolancePolicy", policy =>
                 {
                     policy.RequireClaim("Violance");
                 });
+                opt.AddPolicy("ExpiryDatePolicy", policy =>
+                 {
+                     policy.AddRequirements(new ExpiryDateRequirenment());
+                 });
             });
 
             services.AddIdentity<AppUser, AppRole>(opt =>

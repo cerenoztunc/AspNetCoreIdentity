@@ -13,6 +13,7 @@ using Project.MVC.Enums;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
+using System.Security.Claims;
 
 namespace Project.MVC.Controllers
 {
@@ -157,6 +158,8 @@ namespace Project.MVC.Controllers
                 ViewBag.message = "Since the page you are trying to access contains videos of violence, you must be over the age of 15.";
             else if (returnUrl.Contains("AnkaraPage"))
                 ViewBag.message = "Only users whose city area is Ankara can access this page.";
+            else if (returnUrl.Contains("Exchange"))
+                ViewBag.message = "Your free 30-day usage has expired!";
             else
                 ViewBag.message = "You are not authorized to enter this page! Please contact the site administrator to obtain authorization.";
             return View();
@@ -178,6 +181,24 @@ namespace Project.MVC.Controllers
         }
         [Authorize(Policy ="ViolancePolicy")]
         public IActionResult ViolancePage()
+        {
+            return View();
+        }
+        public async Task<IActionResult> ExchangeRedirect()
+        {
+            if (!User.HasClaim(x => x.Type == "ExpireDate"))
+            {
+                Claim claim = new Claim("ExpireDate", DateTime.Now.AddDays(30).Date.ToShortDateString(), ClaimValueTypes.String, "Internal");
+                await _userManager.AddClaimAsync(CurrentUser, claim);
+
+                await _signInManager.SignOutAsync();
+                await _signInManager.SignInAsync(CurrentUser, true);
+            }
+                
+            return RedirectToAction("Exchange");
+        }
+        [Authorize(Policy = "ExpiryDatePolicy")]
+        public IActionResult Exchange()
         {
             return View();
         }
