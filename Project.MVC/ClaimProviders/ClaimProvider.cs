@@ -26,6 +26,17 @@ namespace Project.MVC.ClaimProviders
                 AppUser appUser = await _userManager.FindByNameAsync(claimsIdentity.Name);
                 if(appUser != null)
                 {
+                    if(appUser.BirthDay != null)
+                    {
+                        var userAge = DateTime.Today.Year - appUser.BirthDay?.Year;
+                        if(userAge > 15)
+                        {
+                            Claim violanceClaim = new Claim("Violance", true.ToString(), ClaimValueTypes.String, "Internal");
+                            claimsIdentity.AddClaim(violanceClaim);
+                            
+                        }
+                        
+                    }
                     if(appUser.City != null)
                     {
                         if (!principal.HasClaim(c => c.Type == "city"))

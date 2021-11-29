@@ -151,8 +151,14 @@ namespace Project.MVC.Controllers
         {
             _signInManager.SignOutAsync();
         }
-        public IActionResult AccessDenied()
+        public IActionResult AccessDenied(string returnUrl)
         {
+            if (returnUrl.Contains("ViolancePage"))
+                ViewBag.message = "Since the page you are trying to access contains videos of violence, you must be over the age of 15.";
+            else if (returnUrl.Contains("AnkaraPage"))
+                ViewBag.message = "Only users whose city area is Ankara can access this page.";
+            else
+                ViewBag.message = "You are not authorized to enter this page! Please contact the site administrator to obtain authorization.";
             return View();
         }
         [Authorize(Roles ="Editor,Admin")]
@@ -167,6 +173,11 @@ namespace Project.MVC.Controllers
         }
         [Authorize(Policy="AnkaraPolicy")]
         public IActionResult AnkaraPage()
+        {
+            return View();
+        }
+        [Authorize(Policy ="ViolancePolicy")]
+        public IActionResult ViolancePage()
         {
             return View();
         }

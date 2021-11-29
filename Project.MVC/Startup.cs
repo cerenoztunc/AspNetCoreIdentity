@@ -38,6 +38,10 @@ namespace Project.MVC
                 {
                     policy.RequireClaim("city", "ankara");
                 });
+                opt.AddPolicy("ViolancePolicy", policy =>
+                {
+                    policy.RequireClaim("Violance");
+                });
             });
 
             services.AddIdentity<AppUser, AppRole>(opt =>
