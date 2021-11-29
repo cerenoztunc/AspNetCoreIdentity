@@ -7,13 +7,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Mapster;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Project.MVC.Controllers
 {
     public class HomeController : BaseController
     {
-        public HomeController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager):base(userManager,signInManager)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public HomeController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IWebHostEnvironment webHostEnvironment) : base(userManager, signInManager)
         {
+            _webHostEnvironment = webHostEnvironment;
         }
         public IActionResult Index()
         {
@@ -39,7 +44,18 @@ namespace Project.MVC.Controllers
                     PhoneNumber = signUpViewModel.PhoneNumber
                 };
                 IdentityResult result = await _userManager.CreateAsync(appUser,signUpViewModel.Password);
-                if (result.Succeeded) return RedirectToAction("LogIn");
+                if (result.Succeeded)
+                {
+                    var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
+                    var link = Url.Action("EmailConfirm", "Home", new
+                    {
+                        userId = appUser.Id,
+                        token = confirmationToken
+                    },HttpContext.Request.Scheme);
+                    Helpers.EmailConfirmation.EmailConfirmationSendEmail(link, appUser.Email);
+                    ViewBag.status = "true";
+                    return View(signUpViewModel);
+                }
                 else
                 {
                     AddModelError(result);
@@ -60,39 +76,48 @@ namespace Project.MVC.Controllers
                 AppUser user = await _userManager.FindByEmailAsync(logInViewModel.Email);
                 if (user != null)
                 {
-                    if(await _userManager.IsLockedOutAsync(user))
+                    if(user.EmailConfirmed == true)
                     {
-                        ModelState.AddModelError("", "Your account has been locked for a while. Please try again later!");
-                    }
-                    await _signInManager.SignOutAsync();
-                    var signInResult = await _signInManager.PasswordSignInAsync(user, logInViewModel.Password, logInViewModel.RememberMe, false);
-
-                    if (signInResult.Succeeded)
-                    {
-                        await _userManager.ResetAccessFailedCountAsync(user);
-                        if (TempData["ReturnUrl"] != null)
+                        if (await _userManager.IsLockedOutAsync(user))
                         {
-                            return Redirect(TempData["ReturnUrl"].ToString());
+                            ModelState.AddModelError("", "Your account has been locked for a while. Please try again later!");
                         }
-                        return RedirectToAction("Index", "Member");
+                        await _signInManager.SignOutAsync();
+                        var signInResult = await _signInManager.PasswordSignInAsync(user, logInViewModel.Password, logInViewModel.RememberMe, false);
+
+                        if (signInResult.Succeeded)
+                        {
+                            await _userManager.ResetAccessFailedCountAsync(user);
+                            if (TempData["ReturnUrl"] != null)
+                            {
+                                return Redirect(TempData["ReturnUrl"].ToString());
+                            }
+                            return RedirectToAction("Index", "Member");
+                        }
+                        else
+                        {
+                            await _userManager.AccessFailedAsync(user);
+
+                            int fail = await _userManager.GetAccessFailedCountAsync(user);
+                            if (fail < 4)
+                            {
+                                ModelState.AddModelError("", $"{fail} times failed login!");
+                                ModelState.AddModelError("", "Username or password is incorrect");
+                            }
+
+                            else
+                            {
+                                await _userManager.SetLockoutEndDateAsync(user, new DateTimeOffset(DateTime.Now.AddMinutes(20)));
+                                ModelState.AddModelError("", "Your account has been locked for 20 minutes due to 3 failed logins!");
+                            }
+                        }
                     }
                     else
                     {
-                        await _userManager.AccessFailedAsync(user);
-                        
-                        int fail = await _userManager.GetAccessFailedCountAsync(user);
-                        if (fail<3)
-                        {
-                            ModelState.AddModelError("", $"{fail} times failed login!");
-                            ModelState.AddModelError("", "Username or password is incorrect");
-                        }
-                        
-                        else if (fail == 3)
-                        {
-                            await _userManager.SetLockoutEndDateAsync(user, new DateTimeOffset(DateTime.Now.AddMinutes(20)));
-                            ModelState.AddModelError("", "Your account has been locked for 20 minutes due to 3 failed logins!");
-                        }
+                        ModelState.AddModelError("", "Your email address has not been verified.Please check your email address!");
+                        return View(logInViewModel);
                     }
+                    
                 }
                 else
                 {
@@ -119,7 +144,7 @@ namespace Project.MVC.Controllers
                     token = passwordResetToken,
                 }, HttpContext.Request.Scheme);
 
-                Helpers.PasswordReset.PasswordResetSendEmail(passwordResetLink);
+                Helpers.PasswordReset.PasswordResetSendEmail(passwordResetLink,appUser.Email);
 
                 ViewBag.status = "successfull";
             }
@@ -162,7 +187,21 @@ namespace Project.MVC.Controllers
             }
             return View();
         }
-        
+
+        public async Task<IActionResult> EmailConfirm(string userId, string token)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            IdentityResult result = await _userManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded)
+            {
+                ViewBag.status = true;
+            }
+
+            else ViewBag.status = false;
+
+            return View();
+        }
+
 
     }
 }

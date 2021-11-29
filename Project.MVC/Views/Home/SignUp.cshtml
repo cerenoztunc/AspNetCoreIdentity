@@ -4,7 +4,17 @@
     ViewData["Title"] = "SignUp";
 }
 
-
+@if (ViewBag.status == "true")
+{
+    <div class="alert-info mt-4">
+        <p>Registration Successful! Activate your account by clicking on the confirmation e-mail sent to your e-mail address.</p>
+    </div>
+    <script>
+        setTimeout(function () {
+            window.location.href = 'https://localhost:44386/Home/LogIn';
+        }, 5000)
+    </script>
+}
 <div class="row">
     <div class="col-md-4 offset-md-4">
         <h4 class="mt-4">Sign Up Form</h4>

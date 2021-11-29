@@ -7,17 +7,17 @@ using System.Threading.Tasks;
 
 namespace Project.MVC.Helpers
 {
-    public static class PasswordReset
+    public static class EmailConfirmation
     {
-        public static void PasswordResetSendEmail(string link,string email)
+        public static void EmailConfirmationSendEmail(string link, string email)
         {
             MailMessage mail = new MailMessage();
-            
+
             mail.From = new MailAddress("n.ceren097@gmail.com");
             mail.To.Add(email);
-            mail.Subject = $"Şifre Sıfırlama";
-            mail.Body = "Şifrenizi yenilemek için lütfen aşağıdaki linke tıklayınız.";
-            mail.Body += $"<a href='{link}'> şifre yenileme linki</a>";
+            mail.Subject = $"Email Verification";
+            mail.Body = "Click on the link to verify your mail";
+            mail.Body += $"<a href='{link}'> email verification link</a>";
             mail.IsBodyHtml = true;
 
             SmtpClient smtpClient = new SmtpClient();

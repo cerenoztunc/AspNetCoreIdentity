@@ -1,0 +1,39 @@
+﻿
+@{
+    ViewData["Title"] = "EmailConfirm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@if (ViewBag.status)
+{
+    <div class="alert-info mt-4">
+        <h2>
+            Your email address has been confirmed.
+            You are redirected to the login page.
+        </h2>
+        <script>
+            setTimeout(function () {
+                window.location.href = 'https://localhost:44386/Home/LogIn';
+            }, 5000);
+        </script>
+    </div>
+}
+else
+{
+<div class="alert-danger mt-4">
+    <h2>
+        Sorry..An error has occurred. Please try again later.
+        You are being redirected to the homepage.
+    </h2>
+    <script>
+        setTimeout(function () {
+            window.location.href = 'https://localhost:44386/Home/Index';
+        }, 5000)
+    </script>
+</div>
+}
+
+
+
+
