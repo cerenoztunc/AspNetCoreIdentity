@@ -10,6 +10,7 @@ using Mapster;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
+using System.Security.Claims;
 
 namespace Project.MVC.Controllers
 {
@@ -187,7 +188,6 @@ namespace Project.MVC.Controllers
             }
             return View();
         }
-
         public async Task<IActionResult> EmailConfirm(string userId, string token)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -201,7 +201,73 @@ namespace Project.MVC.Controllers
 
             return View();
         }
+        public IActionResult FacebookLogin(string ReturnUrl)
+        {
+            string RedirectUrl = Url.Action("ExternalResponse", "Home", new
+            {
+                ReturnUrl = ReturnUrl
+            }); //kullanıcının facebook giriş sayfasındaki işlemlerini yaptıktan sonra gidecek olduğu url'i oluşturduk..
+            var property = _signInManager.ConfigureExternalAuthenticationProperties("Facebook", RedirectUrl); //nereye gideceği(Facebook) ve nereye döneceğini(döneceği sayfa) belirttik..
 
+            return new ChallengeResult("Facebook", property); //butona tıklandığında dönüş bilgisiyle birlikte facebook login sayfasına yönlendirdik..
+        }
+        public async Task<IActionResult> ExternalResponse(string ReturnUrl="/") //kullanıcının döneceği sayfa
+        {
+            //kullanıcının facebook login olduğu ile ilgili bilgileri aldık..
+            ExternalLoginInfo info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null) //kullanıcı facebook login ekranında bilgilerini vermemiş olabilir..
+            {
+                return RedirectToAction("LogIn");
+            }
+            else
+            {
+                Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, true);
+                if (result.Succeeded) return Redirect(ReturnUrl);
+                else
+                {
+                    AppUser appUser = new AppUser();
+                    //facebooktan gelen email, name, username gibi bilgileri identity api claim bilgilerine dönüştürerek bize sunuyor..principal üzerinden biz bu claimlere erişebiliyoruz. aynı zamanda FindFirst metodu üzerinden de erişiliyor..
+                    appUser.Email = info.Principal.FindFirst(ClaimTypes.Email).Value;
+                    string ExternalUserId = info.Principal.FindFirst(ClaimTypes.NameIdentifier).Value;
+                    if (info.Principal.HasClaim(x=>x.Type==ClaimTypes.Name))
+                    {
+                        string userName = info.Principal.FindFirst(ClaimTypes.Name).Value; //kullanıcı adını aldık ancak bu isim bize (Ceren Öztunç gibi) arasında boşluklu geliyor..
+                        userName = userName.Replace(' ', '-').ToLower() + ExternalUserId.Substring(0, 5).ToString();
+                        appUser.UserName = userName;
+                    }
+                    else
+                    {
+                        appUser.UserName = info.Principal.FindFirst(ClaimTypes.Email).Value;
+                    }
+                    IdentityResult createResult = await _userManager.CreateAsync(appUser);
+                    if (createResult.Succeeded)
+                    {
+                        IdentityResult loginResult = await _userManager.AddLoginAsync(appUser, info); //bilgileri userlogins tablosuna kaydettik..Üçüncü taraf kimlik doğrulamalarda bu tablo mutlaka doldurulmalıdır. Yoksa facebook'tan giriş yapıldığını anlayamaz..
+                        if (loginResult.Succeeded)
+                        {
+                            //await _signInManager.SignInAsync(appUser, true); //burada normal bir kullanıcı gibi kayıt ettiğimiz için claim bilgilerinde facebook'tan geldiğine dair bir iz bulamayız.. bunun iin aşağıdaki gibi external signin yapmak gerekir..
+
+                            await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, true); //böyle yapınca bunun üzerinden claim bazlı yetkilendirme de yapabiliriz. örneğin sadece facebook'tan gelen kullanıcıların görebildiği bir sayfa..
+                            return Redirect(ReturnUrl);
+                        }
+                        else
+                        {
+                            AddModelError(loginResult);
+                        }
+                    }
+                    else
+                    {
+                        AddModelError(createResult);
+                    }
+                }
+            }
+            List<string> errors = ModelState.Values.SelectMany(x => x.Errors).Select(y => y.ErrorMessage).ToList();
+            return View("Error",errors);
+        }
+        public IActionResult Error()
+        {
+            return View();
+        }
 
     }
 }

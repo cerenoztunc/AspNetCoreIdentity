@@ -51,6 +51,13 @@ namespace Project.MVC
                  });
             });
 
+            //facebook settings
+            services.AddAuthentication().AddFacebook(opt =>
+            {
+                opt.AppId = _configuration["Authentication:Facebook:AppId"];
+                opt.AppSecret = _configuration["Authentication:Facebook:AppSecret"];
+            });
+
             services.AddIdentity<AppUser, AppRole>(opt =>
             {
                 opt.User.RequireUniqueEmail = true;
