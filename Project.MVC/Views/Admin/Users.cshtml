@@ -5,15 +5,16 @@
 }
 
 <h3 class="mt-4">Members List</h3>
-<table class="table table-bordered table-striped">
+<table class="table table-bordered table-striped table-responsive">
     <thead>
         <tr>
             <th>Id</th>
             <th>UserName</th>
             <th>Email</th>
+            <th>Password</th>
             <th>Roles</th>
             <th>
-                Role Assignment
+                Transactions
             </th>
 
         </tr>
@@ -35,11 +36,16 @@
                     <td>@item.Id</td>
                     <td>@item.UserName</td>
                     <td>@item.Email</td>
+                    <td>@item.PasswordHash</td>
                     <td user-roles="@item.Id"></td>
                     
                     <td>
                         <a class="btn btn-success" asp-action="RoleAssign" asp-route-id="@item.Id">
                             Assign Role
+                        </a>
+                        <hr />
+                        <a class="btn btn-success" asp-action="UsersChangePassword" asp-route-id="@item.Id">
+                            Change Password
                         </a>
                     </td>
                 </tr>

@@ -121,6 +121,33 @@ namespace Project.MVC.Controllers
            
             return RedirectToAction("Users");
         }
+        public IActionResult UsersChangePassword(string id)
+        {
+            AppUser appUser = _userManager.FindByIdAsync(id).Result;
+            AdminChangePasswordViewModel adminChangePasswordViewModel = new AdminChangePasswordViewModel
+            {
+                UserId = appUser.Id,
+                UserName = appUser.UserName
+            };
+            return View(adminChangePasswordViewModel);
+        }
+        [HttpPost]
+        public async Task<IActionResult> UsersChangePassword(AdminChangePasswordViewModel adminChangePasswordViewModel)
+        {
+            AppUser appUser = await _userManager.FindByIdAsync(adminChangePasswordViewModel.UserId);
+             string token = await _userManager.GeneratePasswordResetTokenAsync(appUser);
+            IdentityResult result = await _userManager.ResetPasswordAsync(appUser, token, adminChangePasswordViewModel.Password);
+            if (result.Succeeded)
+            {
+                await _userManager.UpdateSecurityStampAsync(appUser);
+                return RedirectToAction("Users");
+            }
+            else
+            {
+                AddModelError(result);
+            }
+            return View(adminChangePasswordViewModel);
+        }
 
     }
 }
