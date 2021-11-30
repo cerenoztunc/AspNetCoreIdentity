@@ -34,17 +34,22 @@ namespace Project.MVC.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> SignUp(UserViewModel signUpViewModel)
+        public async Task<IActionResult> SignUp(UserViewModel userViewModel)
         {
             if (ModelState.IsValid)
             {
+                if (_userManager.Users.Any(u=>u.PhoneNumber==userViewModel.PhoneNumber))
+                {
+                    ModelState.AddModelError("", "This phone number is registered!");
+                    return View(userViewModel);
+                }
                 AppUser appUser = new AppUser
                 {
-                    UserName = signUpViewModel.UserName,
-                    Email = signUpViewModel.Email,
-                    PhoneNumber = signUpViewModel.PhoneNumber
+                    UserName = userViewModel.UserName,
+                    Email = userViewModel.Email,
+                    PhoneNumber = userViewModel.PhoneNumber
                 };
-                IdentityResult result = await _userManager.CreateAsync(appUser,signUpViewModel.Password);
+                IdentityResult result = await _userManager.CreateAsync(appUser, userViewModel.Password);
                 if (result.Succeeded)
                 {
                     var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
@@ -55,14 +60,14 @@ namespace Project.MVC.Controllers
                     },HttpContext.Request.Scheme);
                     Helpers.EmailConfirmation.EmailConfirmationSendEmail(link, appUser.Email);
                     ViewBag.status = "true";
-                    return View(signUpViewModel);
+                    return View(userViewModel);
                 }
                 else
                 {
                     AddModelError(result);
                 }
             }
-            return View(signUpViewModel);
+            return View(userViewModel);
         }
         public IActionResult LogIn(string returnUrl)
         {

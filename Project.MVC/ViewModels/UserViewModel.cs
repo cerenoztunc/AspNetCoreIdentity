@@ -13,6 +13,7 @@ namespace Project.MVC.ViewModels
         [Required(ErrorMessage = "{0} is required!")]
         public string UserName { get; set; }
         [Display(Name = "Phone Number")]
+        [RegularExpression("^(0(\\d{3}) (\\d{3}) (\\d{2}) (\\d{2}))$",ErrorMessage = "The phone number is not in the correct format.Please enter as 11 digits, prefixed with 0.")]
         public string PhoneNumber { get; set; }
         [Required(ErrorMessage = "{0} is required!")]
         [EmailAddress(ErrorMessage = "{0} is not in the correct format!")]

@@ -93,6 +93,12 @@ namespace Project.MVC.Controllers
             if (ModelState.IsValid)
             {
                 AppUser user = CurrentUser;
+                if (_userManager.Users.Any(u => u.PhoneNumber == userViewModel.PhoneNumber) && user.PhoneNumber!= userViewModel.PhoneNumber)
+                {
+                    ModelState.AddModelError("", "This phone number is registered!");
+                    return View(userViewModel);
+                }
+               
                 if (userPicture != null)
                 {
                     if (user.Picture == null)
