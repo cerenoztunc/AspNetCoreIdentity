@@ -211,6 +211,21 @@ namespace Project.MVC.Controllers
 
             return new ChallengeResult("Facebook", property); //butona tıklandığında dönüş bilgisiyle birlikte facebook login sayfasına yönlendirdik..
         }
+        public IActionResult GoogleLogin(string ReturnUrl)
+        {
+            string RedirectUrl = Url.Action("ExternalResponse", "Home", new
+            {
+                ReturnUrl = ReturnUrl
+            });
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties("Google", RedirectUrl);
+            return new ChallengeResult("Google", properties);
+        }
+        public IActionResult MicrosoftLogin(string ReturnUrl)
+        {
+            string RedirectUrl = Url.Action("ExternalResponse", "Home", new { ReturnUrl = ReturnUrl });
+            var property = _signInManager.ConfigureExternalAuthenticationProperties("Microsoft", RedirectUrl);
+            return new ChallengeResult("Microsoft", property);
+        }
         public async Task<IActionResult> ExternalResponse(string ReturnUrl="/") //kullanıcının döneceği sayfa
         {
             //kullanıcının facebook login olduğu ile ilgili bilgileri aldık..
@@ -239,25 +254,36 @@ namespace Project.MVC.Controllers
                     {
                         appUser.UserName = info.Principal.FindFirst(ClaimTypes.Email).Value;
                     }
-                    IdentityResult createResult = await _userManager.CreateAsync(appUser);
-                    if (createResult.Succeeded)
-                    {
-                        IdentityResult loginResult = await _userManager.AddLoginAsync(appUser, info); //bilgileri userlogins tablosuna kaydettik..Üçüncü taraf kimlik doğrulamalarda bu tablo mutlaka doldurulmalıdır. Yoksa facebook'tan giriş yapıldığını anlayamaz..
-                        if (loginResult.Succeeded)
-                        {
-                            //await _signInManager.SignInAsync(appUser, true); //burada normal bir kullanıcı gibi kayıt ettiğimiz için claim bilgilerinde facebook'tan geldiğine dair bir iz bulamayız.. bunun iin aşağıdaki gibi external signin yapmak gerekir..
 
-                            await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, true); //böyle yapınca bunun üzerinden claim bazlı yetkilendirme de yapabiliriz. örneğin sadece facebook'tan gelen kullanıcıların görebildiği bir sayfa..
-                            return Redirect(ReturnUrl);
+                    AppUser appUser2 = await _userManager.FindByEmailAsync(appUser.Email);
+                    if (appUser2 == null)
+                    {
+                        IdentityResult createResult = await _userManager.CreateAsync(appUser);
+                        if (createResult.Succeeded)
+                        {
+                            IdentityResult loginResult = await _userManager.AddLoginAsync(appUser, info); //bilgileri userlogins tablosuna kaydettik..Üçüncü taraf kimlik doğrulamalarda bu tablo mutlaka doldurulmalıdır. Yoksa facebook'tan giriş yapıldığını anlayamaz..
+                            if (loginResult.Succeeded)
+                            {
+                                //await _signInManager.SignInAsync(appUser, true); //burada normal bir kullanıcı gibi kayıt ettiğimiz için claim bilgilerinde facebook'tan geldiğine dair bir iz bulamayız.. bunun iin aşağıdaki gibi external signin yapmak gerekir..
+
+                                await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, true); //böyle yapınca bunun üzerinden claim bazlı yetkilendirme de yapabiliriz. örneğin sadece facebook'tan gelen kullanıcıların görebildiği bir sayfa..
+                                return Redirect(ReturnUrl);
+                            }
+                            else
+                            {
+                                AddModelError(loginResult);
+                            }
                         }
                         else
                         {
-                            AddModelError(loginResult);
+                            AddModelError(createResult);
                         }
                     }
                     else
                     {
-                        AddModelError(createResult);
+                        IdentityResult loginResult = await _userManager.AddLoginAsync(appUser2, info);
+                        await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey,true);
+                        return Redirect(ReturnUrl);
                     }
                 }
             }
@@ -268,6 +294,7 @@ namespace Project.MVC.Controllers
         {
             return View();
         }
+       
 
     }
 }

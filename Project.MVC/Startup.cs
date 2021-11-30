@@ -56,6 +56,14 @@ namespace Project.MVC
             {
                 opt.AppId = _configuration["Authentication:Facebook:AppId"];
                 opt.AppSecret = _configuration["Authentication:Facebook:AppSecret"];
+            }).AddGoogle(opt =>
+            {
+                opt.ClientId = _configuration["Authentication:Google:ClientId"];
+                opt.ClientSecret = _configuration["Authentication:Google:ClientSecret"];
+            }).AddMicrosoftAccount(opt =>
+            {
+                opt.ClientId = _configuration["Authentication:Microsoft:ClientId"];
+                opt.ClientSecret = _configuration["Authentication:Microsoft:ClientSecret"];
             });
 
             services.AddIdentity<AppUser, AppRole>(opt =>
