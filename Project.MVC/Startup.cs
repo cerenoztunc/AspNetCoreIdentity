@@ -109,6 +109,7 @@ namespace Project.MVC
             app.UseDeveloperExceptionPage(); //alýnan hatalarla ilgili açýklayýcý bilgiler sunar..
             app.UseStatusCodePages(); //özellikle herhangi bir content dönmeyen sayfalarda bilgilendirici yazýlar gösterir..
             app.UseStaticFiles();
+            app.UseRouting();
             app.UseAuthentication();
             app.UseMvcWithDefaultRoute(); //en altta olmasý gerekir..
 

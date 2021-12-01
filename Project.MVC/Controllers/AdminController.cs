@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Project.MVC.Controllers
 {
-    //[Authorize(Roles ="Admin")]
+    [Authorize(Roles ="Admin")]
     public class AdminController : BaseController
     {
         public AdminController(UserManager<AppUser> userManager,RoleManager<AppRole> roleManager):base(userManager,null,roleManager)

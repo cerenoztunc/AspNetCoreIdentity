@@ -299,6 +299,10 @@ namespace Project.MVC.Controllers
         {
             return View();
         }
+        public IActionResult Policy()
+        {
+            return View();
+        }
        
 
     }
